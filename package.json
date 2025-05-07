@@ -1,0 +1,16 @@
+{
+    "name": "my-node-app",
+    "version": "1.0.0",
+    "description": "A simple Node.js app with a test file",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "test": "node test.js"
+    },
+    "keywords": [],
+    "author": "GCU Master",
+    "license": "MIT",
+    "dependencies": {
+        "my-node-app": "file:"
+    }
+}
