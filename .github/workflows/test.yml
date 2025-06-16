@@ -1,8 +1,7 @@
 name: Node.js CI with Cache & Multi-job  # 🏷️ Workflow name shown in Actions tab
 
 on:
-  push:
-    branches: [main]  # 🧨 Triggers the workflow when you push to main branch
+  push # 🧨 Triggers the workflow when you push to main branch
 
 jobs:
   test:  # 🧪 First job: run tests
