@@ -1,4 +1,4 @@
-const { add, fetchData } = require('./index');
+const { add, fetchData } = require('./app');
 
 async function runTests() {
   // Test the add function
