@@ -1,19 +1,58 @@
-name: Test Workflow
-on: push
+name: Node.js CI with Cache & Multi-job  # 🏷️ Workflow name shown in Actions tab
+
+on:
+  push:
+    branches: [main]  # 🧨 Triggers the workflow when you push to main branch
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:  # 🧪 First job: run tests
+    runs-on: ubuntu-latest  # 🛠️ Uses Ubuntu VM to run the job
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4  # 📥 Check out your repository code
 
-      - name: Make script executable
-        run: chmod +x ./set-outputs.sh
+      - name: Setup Node
+        uses: actions/setup-node@v4  # 📦 Install Node.js
+        with:
+          node-version: '20'  # 🎯 Use Node.js v20
 
-      - id: publish
-        run: ./set-outputs.sh
+      - name: Cache ~/.npm
+        id: cache
+        uses: actions/cache@v4  # 💾 Use GitHub's cache action
+        with:
+          path: ~/.npm  # 📁 Cache the npm cache directory (not node_modules)
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}  # 🔑 Unique cache key based on OS + lockfile
+          restore-keys: |
+            ${{ runner.os }}-node-  # 🔁 Fallback key prefix (use partial match if exact key isn't found)
 
-      - name: Use outputs
-        run: |
-          echo "File: ${{ steps.publish.outputs.script-file }}"
-          echo "Folder: ${{ steps.publish.outputs.build-folder }}"
-          echo "Status: ${{ steps.publish.outputs.status }}"
+      - name: Install dependencies
+        run: npm install  # 📥 Installs dependencies (uses cache if possible)
+
+      - name: Run tests
+        run: node test.js  # ✅ Runs your unit test file
+
+  fetch-posts:  # 🌐 Second job: fetch post using axios
+    needs: test  # ⏱️ Depends on 'test' job to finish first
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4  # 📥 Check out repo code again (each job runs in a fresh VM)
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Restore ~/.npm cache
+        uses: actions/cache@v4  # 💾 Restore the same cache used in 'test' job
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm install  # ⚡ Fast install using restored cache
+
+      - name: Fetch and print post
+        run: node index.js  # 📤 Axios call: fetch and print post data
